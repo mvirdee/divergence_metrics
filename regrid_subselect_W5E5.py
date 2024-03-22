@@ -27,7 +27,7 @@ for v in variable_list:
     print("Current variable to be processed:", v)
     variable_id = v
     reference_dir = os.path.join(wd, 'data', reference_dataset, variable_id)
-    print('Data to process will be loaded from: ', reference_dir)
+    print('Data to process will be loaded from: ', reference_dir, variable_id)
     os.chdir(wd)
     os.chdir(reference_dir)
     reference = xr.open_mfdataset('*.nc', engine='netcdf4')

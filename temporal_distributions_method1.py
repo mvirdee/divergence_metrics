@@ -20,7 +20,6 @@ def hist_dist(data:list, bins='auto'):
     '''
     dists=[]
     bin_range = (min(a.min() for a in data), max(a.max() for a in data))
-    #_, bins_ = np.histogram(data[0], bins=bins) # get bins from first item (=reference dataset?)
     for array in data:
         dist = rv_histogram(np.histogram(array, bins='auto', range=bin_range), density=True)
         dists.append(dist)
@@ -57,12 +56,11 @@ ad_reference_dir = os.path.join(wd, 'ensembles', region.replace(" ","") +"_"+ad_
 ad_reference = load_reference_dataset(ad_reference_dir, start,end)
 
 ##########################################################################################
-# add a step to interpolate 'NaN' values arising from different calendars used by different models (easier to do this after other processing steps)
-# check how many nans per model
+# add a step to interpolate 'NaN' values arising from different calendars used by different models
 nans = models.isnull().sum()
 nans_fraction = nans/models.count()
 
-# check that these are calendar misalignments as expected
+# check that NaNs arise from calendar misalignments as expected
 for v in models:
     nan_mask = models[v].isnull()
     nan_coords = models[v].where(nan_mask, drop=True).reset_coords(drop=True)

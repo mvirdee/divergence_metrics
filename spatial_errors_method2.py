@@ -46,12 +46,11 @@ ad_reference_dir = os.path.join(wd, 'ensembles', region.replace(" ","") +"_"+ad_
 ad_reference = load_reference_dataset(ad_reference_dir, start,end)
 
 ##########################################################################################
-# add a step to interpolate 'NaN' values arising from different calendars used by different models (easier to do this after other processing steps)
-# check how many nans per model
+# add a step to interpolate 'NaN' values arising from different calendars used by different models
 nans = models.isnull().sum()
 nans_fraction = nans/models.count()
 
-# check that these are calendar misalignments as expected
+# check that NaNs arise from calendar misalignments as expected
 for v in models:
     nan_mask = models[v].isnull()
     nan_coords = models[v].where(nan_mask, drop=True).reset_coords(drop=True)
@@ -83,10 +82,7 @@ lon_min, lon_max = lon_c-hr, lon_c+hr
 
 ref = reference
 mod = models
-
 ad_ref = ad_reference
-
-# first create a list of datasets, with each dataset being list of mod or ref subsets, subdivided with different precision
 
 sp_subsets = [1,2,3,5,6,10,15,30]
 
@@ -179,13 +175,11 @@ for j, v in enumerate(var_list):
         L1_ref_v, L2_ref_v, T3_ref_v, T4_ref_v = [], [], [], []
         ks_v, ad_v, cvm_v = [], [], []
 
-        # add entries to the list which are averages over each group of spatial subsets
         for s in sp_subsets:
             print("Number of lat, lon subsets: ", s)
 
             ref_groups = ref_grouped[s]
-            mod_groups = mod_grouped[s]
-            
+            mod_groups = mod_grouped[s]            
             ad_ref_groups = ad_ref_grouped[s]
 
             hellinger_g, wasserstein_g, intquad_g = [], [], []

@@ -46,11 +46,10 @@ ad_reference = load_reference_dataset(ad_reference_dir, start,end)
 
 ##########################################################################################
 # add a step to interpolate 'NaN' values arising from different calendars used by different models
-# check how many nans per model
 nans = models.isnull().sum()
 nans_fraction = nans/models.count()
 
-# check that these are calendar misalignments as expected
+# check that these NaNs arise from calendar misalignments as expected
 for v in models:
     nan_mask = models[v].isnull()
     nan_coords = models[v].where(nan_mask, drop=True).reset_coords(drop=True)
@@ -68,8 +67,6 @@ models = models.interpolate_na(dim='time', method='nearest')
 
 ##########################################################################################
 
-# list models, variables and indices to loop through
-# var_list = [i for i in reference.data_vars]
 var_list=['tasmax']
 models_list_s = models_list.split(',')
 print(var_list, models_list_s)
@@ -83,18 +80,16 @@ lon_range = reference.lon.max().values-reference.lon.min().values
 lat_c = reference.lat.min().values + lat_range/2
 lon_c = reference.lon.min().values + lon_range/2
 
-ref = reference # for when using other reference datasets
+ref = reference
 mod = models
 ad_ref = ad_reference
 
-# initialise model and reference L-moment list/dicts
 L1, L2, T3, T4 = {}, {}, {}, {}
 L1_ref, L2_ref, T3_ref, T4_ref = {}, {}, {}, {}
 Lmom_names = ['$\lambda_1$', '$\lambda_2$', '$𝜏_3$', '$𝜏_4$']
 Lmoms = [L1, L2, T3, T4]
 Lmoms_ref = [L1_ref, L2_ref, T3_ref, T4_ref]
 
-# initialise divergence metric dicts
 hellinger, wasserstein, intquad = {}, {}, {}
 metric_names = ['Hellinger distance', 'Wasserstein distance', 'Integrated quadratic distance']
 metrics = [hellinger, wasserstein, intquad]

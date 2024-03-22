@@ -48,12 +48,11 @@ ad_reference_dir = os.path.join(wd, 'ensembles', region.replace(" ","") +"_"+ad_
 ad_reference = load_reference_dataset(ad_reference_dir, start,end)
 
 ##########################################################################################
-# add a step to interpolate 'NaN' values arising from different calendars used by different models (easier to do this after other processing steps)
-# check how many nans per model
+# add a step to interpolate 'NaN' values arising from different calendars used by different models
 nans = models.isnull().sum()
 nans_fraction = nans/models.count()
 
-# check that these are calendar misalignments as expected
+# check that NaNs arise from calendar misalignments as expected
 for v in models:
     nan_mask = models[v].isnull()
     nan_coords = models[v].where(nan_mask, drop=True).reset_coords(drop=True)
@@ -74,8 +73,6 @@ models = models.interpolate_na(dim='time', method='nearest')
 models = models.reindex_like(reference, method='nearest')
 ad_reference = ad_reference.reindex_like(reference, method='nearest')
 
-print(len(reference['time']), len(models['time']), len(ad_reference['time']))
-
 var_list=['tasmax']
 models_list_s = models_list.split(',')
 print(var_list, models_list_s)
@@ -92,7 +89,6 @@ mod = models
 ad_ref = ad_reference
 
 t_min = 0
-# t_max = len(reference.time)
 t_max = 12000
 t_subset_sizes = range(1,600,10)
 n_samples = [int(np.ceil(t_max/i)) for i in t_subset_sizes]

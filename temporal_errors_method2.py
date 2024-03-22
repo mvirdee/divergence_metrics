@@ -49,12 +49,11 @@ ad_reference = load_reference_dataset(ad_reference_dir, start,end)
 print(len(models['time']), len(reference['time']), len(ad_reference['time']))
 
 ##########################################################################################
-# add a step to interpolate 'NaN' values arising from different calendars used by different models (easier to do this after other processing steps)
-# check how many nans per model
+# add a step to interpolate 'NaN' values arising from different calendars used by different models
 nans = models.isnull().sum()
 nans_fraction = nans/models.count()
 
-# check that these are calendar misalignments as expected
+# check that NaNs are calendar misalignments as expected
 for v in models:
     nan_mask = models[v].isnull()
     nan_coords = models[v].where(nan_mask, drop=True).reset_coords(drop=True)
@@ -72,18 +71,9 @@ models = models.interpolate_na(dim='time', method='nearest')
 
 ##########################################################################################
 
-
-
-####
-
 models = models.reindex_like(reference, method='nearest')
 ad_reference = ad_reference.reindex_like(reference, method='nearest')
 
-print(len(reference['time']), len(models['time']), len(ad_reference['time']))
-
-####
-
-# list models, variables and indices to loop through
 var_list=['tasmax']
 models_list_s = models_list.split(',')
 print(var_list, models_list_s)
@@ -117,14 +107,12 @@ for t in t_subsets:
 
     ad_ref_grouped[t] = ad_ref.resample(time=time_string)
 
-# initialise model and reference L-moment list/dicts
 L1, L2, T3, T4 = {}, {}, {}, {}
 L1_ref, L2_ref, T3_ref, T4_ref = {}, {}, {}, {}
 Lmom_names = ['$\lambda_1$', '$\lambda_2$', '$𝜏_3$', '$𝜏_4$']
 Lmoms = [L1, L2, T3, T4]
 Lmoms_ref = [L1_ref, L2_ref, T3_ref, T4_ref]
 
-# initialise divergence metric dicts
 hellinger, wasserstein, intquad = {}, {}, {}
 metric_names = ['Hellinger distance', 'Wasserstein distance', 'Integrated quadratic distance']
 metrics = [hellinger, wasserstein, intquad]
@@ -147,7 +135,6 @@ for j, v in enumerate(var_list):
         L1_ref_v, L2_ref_v, T3_ref_v, T4_ref_v = [], [], [], []
         ks_v, ad_v, cvm_v = [], [], []
 
-        # add entries to the list which are averages over each group of temporal subsets
         for t in t_subsets:
             print("Number of time subsets: ", math.ceil(t_max/t))
             ref_groups = [g[1] for g in ref_grouped[t]]
@@ -172,7 +159,6 @@ for j, v in enumerate(var_list):
                 if model == "MERRA2":
                     B = np.array(ad_ref_groups[g][v]).flatten()
 
-                # Calculate L-moments for each model
                 A_L1, A_L2, A_T3, A_T4 = lmoments3.lmom_ratios(A, nmom=4)
                 B_L1, B_L2, B_T3, B_T4 = lmoments3.lmom_ratios(B, nmom=4)
                 

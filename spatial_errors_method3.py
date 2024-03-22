@@ -47,11 +47,10 @@ ad_reference = load_reference_dataset(ad_reference_dir, start,end)
 
 ##########################################################################################
 # add a step to interpolate 'NaN' values arising from different calendars used by different models (easier to do this after other processing steps)
-# check how many nans per model
 nans = models.isnull().sum()
 nans_fraction = nans/models.count()
 
-# check that these are calendar misalignments as expected
+# check that NaNs arise from calendar misalignments as expected
 for v in models:
     nan_mask = models[v].isnull()
     nan_coords = models[v].where(nan_mask, drop=True).reset_coords(drop=True)
@@ -72,8 +71,6 @@ models = models.interpolate_na(dim='time', method='nearest')
 models = models.reindex_like(reference, method='nearest')
 ad_reference = ad_reference.reindex_like(reference, method='nearest')
 
-# print(len(reference['time']), len(models['time']), len(ad_reference['time']))
-
 var_list=['tasmax']
 models_list_s = models_list.split(',')
 print(var_list, models_list_s)
@@ -91,10 +88,7 @@ lon_min, lon_max = lon_c-hr, lon_c+hr
 
 ref = reference
 mod = models
-
 ad_ref = ad_reference
-
-# first create a list of datasets, with each dataset being list of model or reference subsets, subdivided with different precision
 
 sp_subset_sizes = range(1,r+1)
 n_samples = [int(np.ceil(r**2/i**2)) for i in sp_subset_sizes]
@@ -130,14 +124,12 @@ for i, s in enumerate(sp_subset_sizes):
     mod_grouped[s] = mod_groups
     ad_ref_grouped[s] = ad_ref_groups
 
-# initialise model and reference L-moment list/dicts
 L1, L2, T3, T4 = {}, {}, {}, {}
 L1_ref, L2_ref, T3_ref, T4_ref = {}, {}, {}, {}
 Lmom_names = ['$\lambda_1$', '$\lambda_2$', '$𝜏_3$', '$𝜏_4$']
 Lmoms = [L1, L2, T3, T4]
 Lmoms_ref = [L1_ref, L2_ref, T3_ref, T4_ref]
 
-# initialise divergence metric dicts
 hellinger, wasserstein, intquad = {}, {}, {}
 metric_names = ['Hellinger distance', 'Wasserstein distance', 'Integrated quadratic distance']
 metrics = [hellinger, wasserstein, intquad]
@@ -160,7 +152,6 @@ for j, v in enumerate(var_list):
         L1_ref_v, L2_ref_v, T3_ref_v, T4_ref_v = [], [], [], []
         ks_v, ad_v, cvm_v = [], [], []
 
-        # add entries to the list which are averages over each group of spatial subsets
         for s in sp_subset_sizes:
             print("Size of subsets: lat x lon = {} x {}".format(s,s))
             ref_groups = ref_grouped[s]
